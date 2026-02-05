@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8088:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - his-golang-api
+      - postgres-db
+
+  postgres-db:
+    image: postgres:15.1-alpine
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - '4012:5432'
+    environment:
+      - POSTGRES_USER=admin001@postgresql.com
+      - POSTGRES_PASSWORD=admin001
+      - POSTGRES_DB=his
+    networks:
+      postgresSite:
+        ipv4_address: 10.5.0.5
+  his-golang-api:
+    depends_on:
+      - postgres-db
+    build: .
+    restart: always
+    ports:
+      - '4011:4011'
+    environment:
+      - POSTGRES_HOSTNAME=10.5.0.5
+      - POSTGRES_PORT=4012
+
+networks:
+  postgresSite:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
+
+volumes:
+  db_data:

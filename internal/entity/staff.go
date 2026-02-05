@@ -1,0 +1,8 @@
+package entity
+
+type Staff struct {
+	Id string `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"-"`
+	Hospital string `json:"hospital"`
+}
